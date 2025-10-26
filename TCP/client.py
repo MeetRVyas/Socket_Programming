@@ -1,5 +1,6 @@
 import socket
 import time
+from tqdm import tqdm
 
 class Client :
     def __init__(
@@ -52,12 +53,19 @@ def _generate_text(length = None):
         import lorem
         return lorem.paragraph()
 
+def wait(timeout : int = 20) :
+    for i in tqdm(range(timeout), "Doing timepass") :
+        time.sleep(1)
+        print(i + 1, end = "... ")
+    print("")
+
 def main() :
     text = _generate_text()
     client = Client()
     client.establish_connection()
     client.send(text)
     client.recieve()
+    wait()
     client.close()
 
 if __name__ == "__main__" :

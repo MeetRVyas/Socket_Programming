@@ -38,13 +38,16 @@ class Server :
 
     def handle_messages(self):
         print(f"[WAITING] Server ready to receive messages...")
+        clients : int = 0
         try :
-            while True:
+            while clients < self.MAX_CLIENTS :
                 data, addr = self.server_socket.recvfrom(1024)
+                clients += 1
                 # Start a new thread to handle each message
                 thread = threading.Thread(target=self.handle_client_message, args=(data, addr))
                 thread.start()
                 print(f"[ACTIVE THREADS] {threading.active_count() - 1}")
+            thread.join()
         except :
             return
 

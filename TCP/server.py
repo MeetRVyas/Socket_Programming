@@ -68,6 +68,7 @@ class Server :
             thread = threading.Thread(target = self.handle_client, args = (conn, addr))
             thread.start()
             print(f"[ACTIVE CONNECTIONS] {threading.active_count() - 1}")
+        thread.join()
 
     def close(self) :
         # Close the connection

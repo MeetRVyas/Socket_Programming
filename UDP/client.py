@@ -1,16 +1,16 @@
 import socket
 import time
+from tqdm import tqdm
 
 class Client :
     def __init__(
             self,
             ip = socket.AF_INET,
-            protocol = socket.SOCK_STREAM,
             address : str = "127.0.0.1",
             port : int = 5000,
             ) :
         self.ip = ip
-        self.protocol = protocol
+        self.protocol = socket.SOCK_DGRAM
         self.address = address
         self.port = port
     
@@ -18,25 +18,20 @@ class Client :
         # Made a client socket with IPv4 addressing (AF_INET)
         # and TCP protocol (SOCK_STREAM) as default
         return socket.socket(self.ip, self.protocol)
-
-    def _connect_to_port(self) :
-        # Connecting the client to server at localhost (127.0.0.1) at port 5000
-        self.client_socket.connect((self.address, self.port))
-        print(f"[CLIENT CONNECTED] {self.address} at port {self.port}")
     
     def establish_connection(self) :
         self.client_socket = self._create_socket()
-        self._connect_to_port()
+        print(f"[CLIENT READY] Using UDP to {self.address}:{self.port}")
     
     def send(self, text : str) :
         # Send data to the server
-        self.client_socket.sendall(text.encode())
+        self.client_socket.sendto(text.encode(), (self.address, self.port))
     
     def recieve(self) :
         # Receive data from server
-        data = self.client_socket.recv(1024).decode()
-        print(f"Data received from server -> {data}")
-        return data
+        data, addr = self.client_socket.recvfrom(1024)
+        print(f"Data received from server -> {data.decode()}")
+        return data.decode()
 
     def close(self) :
         # Close the connection
@@ -52,12 +47,19 @@ def _generate_text(length = None):
         import lorem
         return lorem.paragraph()
 
+def wait(timeout : int = 20) :
+    for i in tqdm(range(timeout), "Doing timepass") :
+        time.sleep(1)
+        print(i + 1, end = "... ")
+    print("")
+
 def main() :
     text = _generate_text()
     client = Client()
     client.establish_connection()
     client.send(text)
     client.recieve()
+    wait()
     client.close()
 
 if __name__ == "__main__" :
